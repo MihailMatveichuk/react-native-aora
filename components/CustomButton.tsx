@@ -6,6 +6,7 @@ type Props = {
   styles?: string;
   textStyle?: string;
   isLoading?: boolean;
+  disabled?: boolean;
   onPress?: () => void;
 };
 
@@ -14,14 +15,15 @@ export function CustomButton({
   styles,
   textStyle,
   isLoading,
+  disabled,
   onPress,
 }: Props) {
   return (
     <TouchableOpacity
       className={`${styles} ${
-        isLoading ? 'opacity-50 cursor-not-allowed' : ''
+        isLoading || disabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
-      disabled={isLoading}
+      disabled={isLoading || disabled}
       onPress={onPress}
       activeOpacity={0.7}
     >
