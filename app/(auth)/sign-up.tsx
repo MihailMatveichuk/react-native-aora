@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 
 import { images } from '@/constants';
 import { CustomButton, CustomInput } from '@/components';
+import { createUser } from '@/lib/appwrite';
 
 export default function SingUp() {
   const [email, setEmail] = useState('');
@@ -24,12 +25,12 @@ export default function SingUp() {
   };
 
   const handleSubmit = () => {
-    const data = { email, password };
+    // const data = { email, password };
 
-    setEmail('');
-    setPassword('');
+    // setEmail('');
+    // setPassword('');
 
-    console.log(data);
+    createUser();
   };
 
   return (
