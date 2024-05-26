@@ -42,9 +42,10 @@ export default function TabsLayout() {
           },
         }}
       >
-        {tabsData.map(({ name, title, src }) => (
+        {tabsData.map(({ name, title, src }, index) => (
           <Tabs.Screen
             name={name}
+            key={index}
             options={{
               title,
               headerShown: false,

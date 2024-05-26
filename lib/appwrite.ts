@@ -1,4 +1,11 @@
-import { Account, Client, ID } from 'react-native-appwrite';
+import {
+  Account,
+  Avatars,
+  Client,
+  Databases,
+  ID,
+  Query,
+} from 'react-native-appwrite';
 
 export const config = {
   endpoint: 'https://cloud.appwrite.io/v1',
@@ -18,14 +25,103 @@ client
   .setPlatform(config.platform);
 
 const account = new Account(client);
+const avatars = new Avatars(client);
+const databases = new Databases(client);
 
-export const createUser = () => {
-  account.create(ID.unique(), 'me@example.com', 'password', 'Jane Doe').then(
-    function (response) {
-      console.log(response);
-    },
-    function (error) {
-      console.log(error);
+type User = {
+  email: string;
+  password: string;
+  username?: string;
+};
+
+export const createUser = async ({ email, password, username }: User) => {
+  try {
+    const newAccount = await account.create(
+      ID.unique(),
+      email,
+      password,
+      username
+    );
+
+    if (!newAccount) {
+      throw new Error('Failed to create account');
     }
-  );
+
+    const avatarUrl = avatars.getInitials(username);
+
+    await singIn({ email, password });
+
+    const newUser = await databases.createDocument(
+      config.databaseId,
+      config.usersCollectionId,
+      ID.unique(),
+      {
+        accountId: newAccount.$id,
+        email,
+        username,
+        avatar: avatarUrl,
+      }
+    );
+
+    return newUser;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+      throw new Error('An unexpected error occurred');
+    }
+  }
+};
+
+export const singIn = async ({ email, password }: User) => {
+  try {
+    const session = await account.createEmailPasswordSession(email, password);
+    if (!session) {
+      throw new Error('Failed to login');
+    }
+    return session;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+      throw new Error('An unexpected error occurred');
+    }
+  }
+};
+
+export const getCurrentUser = async () => {
+  try {
+    const session = await account.get();
+    console.log(session);
+
+    if (!session) {
+      throw new Error('Failed to get current user');
+    }
+
+    const currentUser = await databases.listDocuments(
+      config.databaseId,
+      config.usersCollectionId,
+      [Query.equal('accountId', session.$id)]
+    );
+
+    console.log(currentUser);
+
+    if (!currentUser) {
+      throw new Error('Failed to get current user');
+    }
+
+    return currentUser.documents[0];
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+      throw new Error('An unexpected error occurred');
+    }
+  }
 };

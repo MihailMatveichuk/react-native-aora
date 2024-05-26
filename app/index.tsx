@@ -6,9 +6,15 @@ import { StatusBar } from 'expo-status-bar';
 
 import { CustomButton } from '@/components';
 import { images } from '@/constants';
+import { useGlobalContext } from '@/context/GlobalProvider';
 
 export default function TabLayout() {
   const handleSingIn = () => router.push('/sign-in');
+  const { isLoggedIn, isLoading } = useGlobalContext();
+
+  if (!isLoading && isLoggedIn) return <Redirect href="/home" />;
+
+  if (isLoading) return null;
 
   return (
     <SafeAreaView className="bg-primary h-full">

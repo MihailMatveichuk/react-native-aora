@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { images } from '@/constants';
 import { CustomButton, CustomInput } from '@/components';
@@ -24,13 +24,26 @@ export default function SingUp() {
     setPassword(e);
   };
 
-  const handleSubmit = () => {
-    // const data = { email, password };
+  const handleSubmit = async () => {
+    const data = { email, password, username };
+    setIsSubmitting(true);
 
-    // setEmail('');
-    // setPassword('');
+    try {
+      const result = await createUser(data);
+      setEmail('');
+      setPassword('');
+      setUsername('');
+      setIsSubmitting(false);
 
-    createUser();
+      router.replace('/home');
+
+      console.log(result.data);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        Alert.alert('Error', error.message);
+        setIsSubmitting(false);
+      }
+    }
   };
 
   return (
